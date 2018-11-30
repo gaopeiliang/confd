@@ -6,6 +6,7 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"strings"
 )
 
 // Nodes is a custom flag Var representing a list of etcd nodes.
@@ -136,4 +137,26 @@ func recursiveLookup(root string, pattern string, dirsLookup bool) ([]string, er
 		}
 	}
 	return result, nil
+}
+
+// Indent prefixes each line of a string with the specified number of spaces
+func Indent(spaces int, s string) (string, error) {
+	if spaces < 0 {
+		return "", fmt.Errorf("indent value must be a positive integer")
+	}
+	var output, prefix []byte
+	var sp bool
+	var size int
+	prefix = []byte(strings.Repeat(" ", spaces))
+	sp = true
+	for _, c := range []byte(s) {
+		if sp && c != '\n' {
+			output = append(output, prefix...)
+			size += spaces
+		}
+		output = append(output, c)
+		sp = c == '\n'
+		size++
+	}
+	return string(output[:size]), nil
 }

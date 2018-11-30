@@ -15,6 +15,7 @@ import (
 
 	util "github.com/kelseyhightower/confd/util"
 	"github.com/kelseyhightower/memkv"
+	"gopkg.in/yaml.v2"
 )
 
 func newFuncMap() map[string]interface{} {
@@ -23,6 +24,7 @@ func newFuncMap() map[string]interface{} {
 	m["split"] = strings.Split
 	m["json"] = UnmarshalJsonObject
 	m["jsonArray"] = UnmarshalJsonArray
+	m["toYaml"] = marshalToYaml
 	m["dir"] = path.Dir
 	m["map"] = CreateMap
 	m["getenv"] = Getenv
@@ -167,6 +169,23 @@ func UnmarshalJsonArray(data string) ([]interface{}, error) {
 	var ret []interface{}
 	err := json.Unmarshal([]byte(data), &ret)
 	return ret, err
+}
+
+func marshalToYaml(data map[string]interface{}, indent_args ...int) (string, error) {
+
+	indent := 0
+	if len(indent_args) > 0 {
+		indent = indent_args[0]
+	}
+
+	yaml_data, err := yaml.Marshal(data)
+
+	if err != nil {
+		return "", err
+	}
+
+	indent_data, err := util.Indent(indent, string(yaml_data))
+	return indent_data, err
 }
 
 func LookupIP(data string) []string {
